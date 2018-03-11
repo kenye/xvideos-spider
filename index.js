@@ -37,6 +37,12 @@ function download(fileName, filePath) {
 		header: this.header
 	};
 	let stream = fs.createWriteStream('./video/' + fileName);
+	// stream.on('finish', () => {
+	// 	logger.info(`${fileName} is done`);
+	// });
+	// stream.on('pipe', (src) => {
+	// 	logger.info(`${src} is go on`);
+	// });
 	return new Promise((resolve, reject) => {
 		request(reqConfig)
 			.on('error', (err) => {
@@ -107,6 +113,7 @@ class Spider {
 			for (let task of taskList) {
 				logger.info(`start batch download videos:${task.name}`);
 			}
+			taskList.length = 1;
 			await this.batchDownload(taskList);
 		}
 	}
