@@ -87,7 +87,7 @@ class Spider {
 	async batchDownload(taskList) {
 		return Promise.map(taskList, (task) => {
 			return download(task.name, task.src)
-		}, taskList.length)
+		}, {concurrency: taskList.length})
 	}
 
 
@@ -96,7 +96,6 @@ class Spider {
 		for (let i = 1; i < 1000; i++) {
 			let url = `http://www.xvideos.com/new/${i}`;
 			let urlList = await this.openListPage(url);
-			logger.info(`find video page ${urlList}`);
 
 			let taskList = [];
 			for (let _url of urlList) {
