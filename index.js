@@ -102,7 +102,6 @@ class Spider {
 				let {name, src} = await this.openVideoPage(_url);
 				logger.info(`find video name:${name}`);
 				taskList.push({name, src});
-				// await download(name, src);
 			}
 
 			for (let task of taskList) {
