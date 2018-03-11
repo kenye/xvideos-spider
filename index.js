@@ -3,11 +3,16 @@
  */
 
 const fs = require('fs');
+const log4js = require('log4js');
 const request = require('request');
+const Promise = require('bluebird');
 const puppeteer = require('puppeteer');
 
+const logger = log4js.getLogger();
+logger.level = 'info';
+
 function parseListPage() {
-	let ele = $(".v-search-video-box-video-info .xvideo-thumbnail-mask");
+	let ele = $(".thumb-block .thumb > a");
 
 	let u = [];
 	ele.each(function (index, elem) {
@@ -20,8 +25,8 @@ function parseListPage() {
 
 function parseVideoPage() {
 	return {
-		name: window.document.title + '.mp4',
-		src: window.xvideoData.html5_href
+		name: ((window.html5player.video_title + '.mp4').replace(/ /g, '_')).replace(/\?/g, ''),
+		src: window.html5player.url_high,
 	};
 }
 
@@ -45,6 +50,7 @@ function download(fileName, filePath) {
 	})
 }
 
+
 class Spider {
 	constructor() {
 		this.conf = {
@@ -56,17 +62,13 @@ class Spider {
 
 	async init() {
 		this.browser = await puppeteer.launch(this.conf);
-		this.fetcher = await puppeteer.createBrowserFetcher({
-			host: 'http://d8.cdc8.space',
-			path: './video'
-		});
 	}
 
 
 	async openListPage(url) {
 		let page = await this.browser.newPage();
 		await page.goto(url);
-		await page.waitForSelector('.v-search-video-box-video-info .xvideo-thumbnail-mask', {timeout: 3000 * 90});
+		await page.waitForSelector('.thumb-block .thumb > a', {timeout: 3000 * 90});
 		let urlList = await page.evaluate(parseListPage);
 		page.close();
 		return urlList;
@@ -81,26 +83,31 @@ class Spider {
 		return urlList;
 	}
 
-	async saveVideo(url) {
-		let page = await this.browser.newPage();
-		await page.goto(url);
-		await page.focus('body');
-		return '';
+
+	async batchDownload(taskList) {
+		return Promise.map(taskList, (task) => {
+			return download(task.name, task.src)
+		}, taskList.length)
 	}
 
 
 	async run() {
 		await this.init();
 		for (let i = 1; i < 1000; i++) {
-			let url = `http://d8.cdc8.space/v/search?title=%E5%AB%A9%E5%A6%B9&page=${i}`;
+			let url = `http://www.xvideos.com/new/${i}`;
 			let urlList = await this.openListPage(url);
-			console.dir(urlList);
+			logger.info(`find video page ${urlList}`);
 
+			let taskList = [];
 			for (let _url of urlList) {
 				let {name, src} = await this.openVideoPage(_url);
-				console.dir(name, src);
-				await download(name, src);
+				logger.info(`find video name:${name}`);
+				taskList.push({name, src});
+				// await download(name, src);
 			}
+
+			logger.info(`start batch download videos:${taskList}`);
+			await this.batchDownload(taskList);
 		}
 	}
 }
