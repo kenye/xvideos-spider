@@ -6,8 +6,8 @@
 
 ### How to start?
 ```bash
-git clone https://github.com/p-spider/d8video-spider.git
-cd d8video-spider
+git clone https://github.com/p-spider/xvideos-spider.git
+cd xvideos-spider
 yarn add puppeteer --ignore-scripts
 yarn install
 yarn start
