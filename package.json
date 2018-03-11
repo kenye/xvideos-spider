@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "bluebird": "^3.5.1",
+    "log4js": "^2.5.3",
     "puppeteer": "^1.1.1"
   },
   "name": "d8video",
