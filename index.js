@@ -105,7 +105,9 @@ class Spider {
 				// await download(name, src);
 			}
 
-			logger.info(`start batch download videos:${taskList}`);
+			for (let task of taskList) {
+				logger.info(`start batch download videos:${task.name}`);
+			}
 			await this.batchDownload(taskList);
 		}
 	}
